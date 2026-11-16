@@ -8,8 +8,6 @@ import 'package:khadematy_web/provider/profile/models/provider_profile_model.dar
 import 'package:khadematy_web/provider/profile/providers/profile_provider.dart';
 import 'package:khadematy_web/provider/auth/providers/auth_provider.dart';
 import 'package:khadematy_web/provider/shell/views/provider_page_header_card.dart';
-import 'package:khadematy_web/provider/shell/views/provider_metric_card.dart';
-import 'package:khadematy_web/provider/shell/views/provider_stats_row.dart';
 import 'edit_profile_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -557,31 +555,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildStatItem({
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: AppTextStyles.headlineSmall.copyWith(
-            fontWeight: FontWeight.w800,
-            color: color,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: AppTextStyles.labelSmall.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
-      ],
     );
   }
 

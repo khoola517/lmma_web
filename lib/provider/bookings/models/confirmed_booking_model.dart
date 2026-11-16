@@ -46,34 +46,50 @@ class ConfirmedBookingModel {
     Map<String, dynamic> json, {
     String? targetProviderId,
   }) {
-    final customer = json['customer'] as Map<String, dynamic>?;
-    final customerName = customer?['full_name'] as String? ?? 'عميل خِدمتي';
-    final customerPhone = customer?['phone'] as String? ?? 'غير متوفر';
+    final rawCustomer = json['customer'];
+    final Map<String, dynamic>? customer = rawCustomer is Map<String, dynamic>
+        ? rawCustomer
+        : (rawCustomer is Map ? Map<String, dynamic>.from(rawCustomer) : null);
+    final customerName = customer?['full_name']?.toString() ?? 'عميل خِدمتي';
+    final customerPhone = customer?['phone']?.toString() ?? 'غير متوفر';
 
     final items = (json['booking_items'] as List?) ?? [];
     final relevantItems = targetProviderId != null
-        ? items
-            .where((i) => i['services']?['provider_id'] == targetProviderId)
-            .toList()
+        ? items.where((i) {
+            if (i is! Map) return false;
+            final srv = i['services'];
+            if (srv is Map) {
+              return srv['provider_id']?.toString() == targetProviderId;
+            }
+            return false;
+          }).toList()
         : items;
     final itemsToUse = (targetProviderId != null && relevantItems.isNotEmpty)
         ? relevantItems
         : (targetProviderId == null ? items : <dynamic>[]);
 
     String serviceName = itemsToUse
-        .map((i) => i['services']?['name']?.toString())
+        .map((i) {
+          if (i is! Map) return null;
+          final srv = i['services'];
+          if (srv is Map) return srv['name']?.toString();
+          return null;
+        })
         .where((n) => n != null && n.isNotEmpty)
         .join(' + ');
     if (serviceName.isEmpty) {
-      serviceName = json['event_type'] as String? ?? 'خدمة مناسبات';
+      serviceName = json['event_type']?.toString() ?? 'خدمة مناسبات';
     }
 
-    String customerLocation = json['event_location'] as String? ?? '';
+    String customerLocation = json['event_location']?.toString() ?? '';
     if (customerLocation.isEmpty) {
-      final firstService = itemsToUse.isNotEmpty
-          ? itemsToUse.first['services'] as Map<String, dynamic>?
-          : null;
-      final firstServiceLoc = firstService?['location'] as String?;
+      String? firstServiceLoc;
+      if (itemsToUse.isNotEmpty && itemsToUse.first is Map) {
+        final srv = itemsToUse.first['services'];
+        if (srv is Map) {
+          firstServiceLoc = srv['location']?.toString();
+        }
+      }
       customerLocation = firstServiceLoc ?? 'صنعاء';
     }
 
@@ -82,18 +98,19 @@ class ConfirmedBookingModel {
             0.0,
             (sum, i) =>
                 sum +
-                ((i['subtotal'] as num?)?.toDouble() ??
-                    ((i['unit_price'] as num?)?.toDouble() ?? 0.0)),
+                ((i is Map ? (i['subtotal'] as num?)?.toDouble() : null) ??
+                    ((i is Map ? (i['unit_price'] as num?)?.toDouble() : null) ?? 0.0)),
           )
         : ((json['total_amount'] as num?)?.toDouble() ??
             (json['budget'] as num?)?.toDouble() ??
             itemsToUse.fold<double>(
               0.0,
-              (sum, i) => sum + ((i['subtotal'] as num?)?.toDouble() ?? 0.0),
+              (sum, i) => sum + ((i is Map ? (i['subtotal'] as num?)?.toDouble() : null) ?? 0.0),
             ));
 
+    final idStr = json['id']?.toString() ?? '';
     final rawCode = json['booking_code']?.toString() ??
-        'BK-${json['id'].toString().substring(0, 4)}';
+        'BK-${idStr.length >= 4 ? idStr.substring(0, 4) : idStr}';
     final bookingNumber = rawCode.replaceAll('#', '');
 
     final eventDate = json['event_date']?.toString() ?? '';
@@ -129,8 +146,8 @@ class ConfirmedBookingModel {
     }
 
     final itemIds = itemsToUse
-        .map((i) => i['id']?.toString())
-        .where((id) => id != null)
+        .map((i) => (i is Map) ? i['id']?.toString() : null)
+        .where((id) => id != null && id.isNotEmpty)
         .cast<String>()
         .toList();
 
@@ -140,20 +157,20 @@ class ConfirmedBookingModel {
     }
 
     return ConfirmedBookingModel(
-      id: json['id'] as String,
+      id: idStr,
       bookingNumber: bookingNumber,
       customerName: customerName,
       customerPhone: customerPhone,
       customerLocation: customerLocation,
       serviceName: serviceName,
-      eventType: json['event_type'] as String? ?? 'مناسبة خاصة',
+      eventType: json['event_type']?.toString() ?? 'مناسبة خاصة',
       eventDate: eventDate,
       eventDateString: eventDate,
       eventTime: eventTime,
       totalAmount: totalAmount,
-      notes: json['notes'] as String? ?? '',
+      notes: json['notes']?.toString() ?? '',
       status: status,
-      customerId: json['customer_id'] as String?,
+      customerId: json['customer_id']?.toString(),
       bookingItemIds: itemIds,
       createdAt: createdAt,
     );

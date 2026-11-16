@@ -183,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
           // Title
           Text(
-            'خِدمتي',
+          "لمة",
             style: GoogleFonts.cairo(
               fontSize: 26,
               fontWeight: FontWeight.w800,
@@ -329,22 +329,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 18),
 
-            // Password
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Text(
-                //   'كلمة المرور',
-                //   style: GoogleFonts.cairo(
-                //     fontSize: 13,
-                //     fontWeight: FontWeight.w600,
-                //     color: const Color(0xFF4A3E44),
-                //   ),
-                // ),
-                
-              ],
-            ),
-            const SizedBox(height: 8),
+
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,

@@ -413,12 +413,12 @@ class _AdminReviewsScreenState extends State<AdminReviewsScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: Color(0xFFFEF2F2),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.15),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.delete_outline_rounded,
-                  color: Color(0xFFDC2626), size: 22),
+                  color: AppColors.primary, size: 22),
             ),
             const SizedBox(width: 12),
             Text(
@@ -465,7 +465,7 @@ class _AdminReviewsScreenState extends State<AdminReviewsScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFDC2626),
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),

@@ -305,14 +305,6 @@ class BookingsProvider extends ChangeNotifier {
       final index = _bookingRequests.indexWhere((r) => r.id == requestId);
       final targetReq = index != -1 ? _bookingRequests[index] : null;
 
-      // منع قبول أي طلب تجاوز مهلة الرد
-      if (targetReq != null && targetReq.isExpired) {
-        _errorMessage =
-            'تجاوز هذا الطلب المهلة المحددة للرد (${targetReq.defaultResponseHours} ساعة)، ولا يمكن قبوله.';
-        notifyListeners();
-        return false;
-      }
-
       // 1. تحديث Supabase أولاً والتأكد من نجاح العملية على الخادم
       if (isUuid) {
         if (targetReq != null && targetReq.bookingItemIds.isNotEmpty) {
@@ -327,11 +319,31 @@ class BookingsProvider extends ChangeNotifier {
           }).eq('booking_id', requestId);
         }
 
-        // تحديث جدول bookings
-        await SupabaseConfig.client.from('bookings').update({
-          'status': 'confirmed',
-          'updated_at': nowIso,
-        }).eq('id', requestId);
+        // تحديث جدول bookings بأمان دون محاولة تعديل status مباشرة
+        // حيث يتم تحديث حالة الحجز تلقائياً عبر Database Trigger on_booking_item_status_change
+        try {
+          await SupabaseConfig.client.from('bookings').update({
+            'updated_at': nowIso,
+          }).eq('id', requestId);
+        } catch (bookingErr) {
+          debugPrint('Note: Direct bookings update handled by trigger or skipped: $bookingErr');
+        }
+
+        // إرسال إشعار للعميل بالموافقة والتأكيد
+        if (targetReq != null && targetReq.customerId != null && targetReq.customerId!.isNotEmpty) {
+          try {
+            await SupabaseConfig.client.from('notifications').insert({
+              'user_id': targetReq.customerId,
+              'title': 'تم قبول وتأكيد طلب الحجز',
+              'body': 'وافق مقدم الخدمة على طلب حجزك رقم #${targetReq.code.replaceAll('#', '')} وتم تأكيده بنجاح.',
+              'type': 'booking_confirmed',
+              'related_booking_id': requestId,
+              'created_at': nowIso,
+            });
+          } catch (ne) {
+            debugPrint('Note: Notification insert error on accept: $ne');
+          }
+        }
       }
 
       // 2. تحديث الحالة محلياً فور نجاح الخادم
@@ -343,7 +355,9 @@ class BookingsProvider extends ChangeNotifier {
           0,
           ConfirmedBookingModel(
             id: targetReq.id,
-            bookingNumber: targetReq.code.replaceAll('#', ''),
+            bookingNumber: targetReq.code.isNotEmpty
+                ? targetReq.code.replaceAll('#', '')
+                : 'BK-${targetReq.id.length >= 4 ? targetReq.id.substring(0, 4) : targetReq.id}',
             customerName: targetReq.customerName,
             customerPhone: targetReq.customerPhone,
             customerLocation: targetReq.location,
@@ -406,10 +420,14 @@ class BookingsProvider extends ChangeNotifier {
           }).eq('booking_id', requestId);
         }
 
-        await SupabaseConfig.client.from('bookings').update({
-          'status': 'cancelled',
-          'updated_at': nowIso,
-        }).eq('id', requestId);
+        try {
+          await SupabaseConfig.client.from('bookings').update({
+            'status': 'cancelled',
+            'updated_at': nowIso,
+          }).eq('id', requestId);
+        } catch (bookingErr) {
+          debugPrint('Note: Direct bookings update on reject handled by trigger: $bookingErr');
+        }
       }
 
       // 2. تحديث الحالة محلياً فور نجاح الخادم
@@ -500,11 +518,15 @@ class BookingsProvider extends ChangeNotifier {
             }).eq('booking_id', requestId);
           }
 
-          await SupabaseConfig.client.from('bookings').update({
-            'status': 'cancelled',
-            'updated_at': nowIso,
-            'notes': 'تم الإلغاء: $cancelReason',
-          }).eq('id', requestId);
+          try {
+            await SupabaseConfig.client.from('bookings').update({
+              'status': 'cancelled',
+              'updated_at': nowIso,
+              'notes': 'تم الإلغاء: $cancelReason',
+            }).eq('id', requestId);
+          } catch (bookingErr) {
+            debugPrint('Note: Direct bookings update on cancel handled by trigger: $bookingErr');
+          }
         }
       }
 

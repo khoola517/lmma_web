@@ -62,9 +62,9 @@ class _BannerCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.burgundy,
+          color: const Color(0xFF2E2527),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.goldLight.withOpacity(0.45), width: 1.5),
+          border: Border.all(color: AppColors.primary.withOpacity(0.45), width: 1.5),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.22),
@@ -80,12 +80,12 @@ class _BannerCard extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: AppColors.goldLight.withOpacity(0.18),
+                color: AppColors.primary.withOpacity(0.18),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
                 Icons.notifications_active_rounded,
-                color: AppColors.goldLight,
+                color: AppColors.primary,
                 size: 22,
               ),
             ),

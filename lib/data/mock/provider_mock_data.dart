@@ -195,7 +195,7 @@ class ProviderMockData {
           subtitle: 'طلب موعد حفل زفاف - قاعة الأوركيد (نورة اليافعي)',
           time: 'منذ ساعتين',
           icon: Icons.event_available,
-          iconColor: AppColors.burgundy,
+          iconColor: const Color(0xFFD97706),
           isRead: false,
         ),
         NotificationModel(

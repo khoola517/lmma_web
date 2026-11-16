@@ -543,8 +543,8 @@ class DashboardScreen extends StatelessWidget {
                                               : 'تعذر قبول الحجز، يرجى المحاولة لاحقاً',
                                         ),
                                         backgroundColor: success
-                                            ? AppColors.burgundy
-                                            : AppColors.error,
+                                            ? AppColors.success
+                                            : const Color(0xFF2E2527),
                                       ),
                                     );
                                   }

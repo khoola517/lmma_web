@@ -29,7 +29,7 @@ class NotificationModel {
       case 'booking':
       case 'new_booking':
         icon = Icons.calendar_today_outlined;
-        iconColor = AppColors.burgundy;
+        iconColor = const Color(0xFFD97706);
         break;
       case 'review':
         icon = Icons.star_outline;
@@ -42,7 +42,7 @@ class NotificationModel {
         break;
       default:
         icon = Icons.notifications_outlined;
-        iconColor = AppColors.burgundy;
+        iconColor = const Color(0xFFD97706);
     }
 
     String timeStr = 'الآن';

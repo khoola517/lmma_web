@@ -24,6 +24,13 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> {
   int _currentPage = 1;
   static const int _itemsPerPage = 5;
   String _lastFilterKey = '';
+  final Set<String> _togglingIds = {};
+
+  bool _isServiceActive(Map<String, dynamic> s) {
+    final status = s['status'] as String? ?? 'active';
+    final isAvail = s['is_available'];
+    return (status == 'active' || status == 'pending') && isAvail != false;
+  }
 
   void _showServiceDetails(BuildContext context, Map<String, dynamic> s) {
     final name = s['name'] as String? ?? 'تفاصيل الخدمة';
@@ -37,7 +44,7 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> {
             : s['provider_name']) ??
         'مقدم خدمة معتمد';
     final location = s['location'] ?? 'غير محدد';
-    final isAvailable = s['is_available'] != false && s['status'] != 'paused';
+    final isAvailable = _isServiceActive(s);
 
     showDialog(
       context: context,
@@ -223,7 +230,7 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> {
       if (_selectedCategory != 'الكل' && cat != _selectedCategory) return false;
 
       // Status filter
-      final isAvailable = s['is_available'] != false && s['status'] != 'paused';
+      final isAvailable = _isServiceActive(s);
       if (_selectedStatus == 'نشطة' && !isAvailable) return false;
       if (_selectedStatus == 'متوقفة' && isAvailable) return false;
 
@@ -599,7 +606,7 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> {
             : s['provider_name']) ??
         'مؤسسة معتمدة';
     final location = s['location'] ?? 'صنعاء - حدة';
-    final isAvailable = s['is_available'] != false && s['status'] != 'paused';
+    final isAvailable = _isServiceActive(s);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -808,40 +815,72 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> {
                 const SizedBox(width: 4),
 
                 // Toggle / Block
-                IconButton(
-                  icon: Icon(
-                    isAvailable
-                        ? Icons.pause_circle_outline
-                        : Icons.play_circle_outline,
-                    size: 17,
-                  ),
-                  color: isAvailable
-                      ? const Color(0xFFC48B28)
-                      : const Color(0xFF10B981),
-                  tooltip: isAvailable ? 'إيقاف الخدمة' : 'تفعيل الخدمة',
-                  constraints:
-                      const BoxConstraints(minWidth: 28, minHeight: 28),
-                  padding: EdgeInsets.zero,
-                  onPressed: () async {
-                    final ok = await adminData.toggleServiceAvailability(
-                        id, isAvailable);
-                    if (context.mounted && ok) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            isAvailable
-                                ? 'تم إيقاف خدمة "$name"'
-                                : 'تم تفعيل خدمة "$name"',
-                            style: GoogleFonts.cairo(),
+                _togglingIds.contains(id)
+                    ? const SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: Center(
+                          child: SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Color(0xFF651C32),
+                            ),
                           ),
-                          backgroundColor: isAvailable
-                              ? const Color(0xFF651C32)
-                              : const Color(0xFF10B981),
                         ),
-                      );
-                    }
-                  },
-                ),
+                      )
+                    : IconButton(
+                        icon: Icon(
+                          isAvailable
+                              ? Icons.pause_circle_outline
+                              : Icons.play_circle_outline,
+                          size: 17,
+                        ),
+                        color: isAvailable
+                            ? const Color(0xFFC48B28)
+                            : const Color(0xFF10B981),
+                        tooltip: isAvailable
+                            ? 'إيقاف وتعطيل الخدمة'
+                            : 'تفعيل الخدمة',
+                        constraints:
+                            const BoxConstraints(minWidth: 28, minHeight: 28),
+                        padding: EdgeInsets.zero,
+                        onPressed: () async {
+                          setState(() => _togglingIds.add(id));
+                          final ok = await adminData.toggleServiceAvailability(
+                              id, isAvailable);
+                          if (context.mounted) {
+                            setState(() => _togglingIds.remove(id));
+                            if (ok) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    isAvailable
+                                        ? 'تم إيقاف وتعطيل خدمة "$name" بنجاح'
+                                        : 'تم تفعيل خدمة "$name" بنجاح',
+                                    style: GoogleFonts.cairo(),
+                                  ),
+                                  backgroundColor: isAvailable
+                                      ? const Color(0xFF651C32)
+                                      : const Color(0xFF10B981),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    adminData.errorMessage ??
+                                        'فشل تغيير حالة الخدمة، يرجى التحقق من الاتصال والمحاولة لاحقاً',
+                                    style: GoogleFonts.cairo(),
+                                  ),
+                                  backgroundColor: AppColors.error,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                      ),
                 const SizedBox(width: 4),
 
                 // Delete

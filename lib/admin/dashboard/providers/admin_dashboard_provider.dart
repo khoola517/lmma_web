@@ -590,14 +590,14 @@ class AdminDashboardProvider extends ChangeNotifier {
       final list = List<Map<String, dynamic>>.from(res as List);
       _services = list;
       _totalServicesCount = _services.length;
-      _activeServicesCount = _services.where((s) => s['status'] != 'paused' && s['is_available'] != false).length;
+      _activeServicesCount = _services.where((s) => (s['status'] == 'active' || s['status'] == null) && s['is_available'] != false).length;
       _pausedServicesCount = _totalServicesCount - _activeServicesCount;
     } catch (e) {
       debugPrint('Error loading admin services: $e');
       if (_services.isEmpty) {
         _services = _getFallbackServices();
         _totalServicesCount = _services.length;
-        _activeServicesCount = _services.where((s) => s['status'] != 'paused' && s['is_available'] != false).length;
+        _activeServicesCount = _services.where((s) => (s['status'] == 'active' || s['status'] == null) && s['is_available'] != false).length;
         _pausedServicesCount = _totalServicesCount - _activeServicesCount;
       }
     }
@@ -605,36 +605,104 @@ class AdminDashboardProvider extends ChangeNotifier {
 
   Future<bool> toggleServiceAvailability(String serviceId, bool currentAvailability) async {
     try {
-      final newStatus = !currentAvailability;
-      await SupabaseConfig.client
-          .from('services')
-          .update({'is_available': newStatus, 'status': newStatus ? 'active' : 'paused'})
-          .eq('id', serviceId);
+      final willBeAvailable = !currentAvailability;
+      final targetStatus = willBeAvailable ? 'active' : 'inactive';
 
+      // 1. محاولة التحديث عبر الـ RPC لضمان الصلاحيات وتجاوز أي قيود
+      bool rpcSucceeded = false;
+      try {
+        final rpcRes = await SupabaseConfig.client.rpc(
+          'admin_toggle_service_availability',
+          params: {
+            'p_service_id': serviceId,
+            'p_is_available': willBeAvailable,
+            'p_status': targetStatus,
+          },
+        );
+        if (rpcRes is Map && rpcRes['success'] == true) {
+          rpcSucceeded = true;
+        }
+      } catch (rpcErr) {
+        debugPrint('admin_toggle_service_availability RPC note, falling back to direct update: $rpcErr');
+      }
+
+      // 2. تحديث مباشر في حال عدم توفر الـ RPC بعد
+      if (!rpcSucceeded) {
+        try {
+          await SupabaseConfig.client
+              .from('services')
+              .update({
+                'is_available': willBeAvailable,
+                'status': targetStatus,
+                'updated_at': DateTime.now().toIso8601String(),
+              })
+              .eq('id', serviceId);
+        } catch (colErr) {
+          // في حال عدم وجود عمود is_available، نحدث status فقط
+          await SupabaseConfig.client
+              .from('services')
+              .update({
+                'status': targetStatus,
+                'updated_at': DateTime.now().toIso8601String(),
+              })
+              .eq('id', serviceId);
+        }
+      }
+
+      // 3. تحديث الحالة في الذاكرة محلياً فوراً
       final index = _services.indexWhere((s) => s['id'] == serviceId);
       if (index != -1) {
-        _services[index]['is_available'] = newStatus;
-        _services[index]['status'] = newStatus ? 'active' : 'paused';
-        _activeServicesCount = _services.where((s) => s['status'] != 'paused' && s['is_available'] != false).length;
+        _services[index]['is_available'] = willBeAvailable;
+        _services[index]['status'] = targetStatus;
+        _activeServicesCount = _services.where((s) => (s['status'] == 'active' || s['status'] == null) && s['is_available'] != false).length;
         _pausedServicesCount = _totalServicesCount - _activeServicesCount;
         notifyListeners();
       }
       return true;
     } catch (e) {
       debugPrint('Error toggling service availability: $e');
+      _errorMessage = 'فشل تغيير حالة الخدمة: $e';
+      notifyListeners();
       return false;
     }
   }
 
   Future<bool> deleteService(String serviceId) async {
     try {
-      await SupabaseConfig.client.from('services').delete().eq('id', serviceId);
+      bool rpcSucceeded = false;
+      try {
+        final rpcRes = await SupabaseConfig.client.rpc(
+          'admin_delete_service',
+          params: {'p_service_id': serviceId},
+        );
+        if (rpcRes is Map && rpcRes['success'] == true) {
+          rpcSucceeded = true;
+        }
+      } catch (rpcErr) {
+        debugPrint('admin_delete_service RPC note: $rpcErr');
+      }
+
+      if (!rpcSucceeded) {
+        try {
+          await SupabaseConfig.client.from('services').delete().eq('id', serviceId);
+        } catch (e) {
+          debugPrint('Hard delete error, performing soft delete: $e');
+          await SupabaseConfig.client
+              .from('services')
+              .update({
+                'status': 'inactive',
+                'is_available': false,
+                'updated_at': DateTime.now().toIso8601String(),
+              })
+              .eq('id', serviceId);
+        }
+      }
     } catch (e) {
       debugPrint('Error deleting service from Supabase: $e');
     }
     _services.removeWhere((item) => item['id'].toString() == serviceId);
     _totalServicesCount = _services.length;
-    _activeServicesCount = _services.where((s) => s['status'] != 'paused' && s['is_available'] != false).length;
+    _activeServicesCount = _services.where((s) => (s['status'] == 'active' || s['status'] == null) && s['is_available'] != false).length;
     _pausedServicesCount = _totalServicesCount - _activeServicesCount;
     notifyListeners();
     return true;

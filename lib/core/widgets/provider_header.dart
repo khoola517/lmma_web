@@ -43,7 +43,7 @@ class ProviderHeader extends StatelessWidget {
               height: 42,
               decoration: BoxDecoration(
                 
-                color: AppColors.creamBg,
+                color: AppColors.cardBg,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.border),
               ),
@@ -59,7 +59,7 @@ class ProviderHeader extends StatelessWidget {
                   prefixIcon: const Icon(
                     Icons.search,
                     size: 20,
-                    color: AppColors.burgundy,
+                    color: Color(0xFF8C7B83),
                   ),
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
@@ -104,7 +104,7 @@ class ProviderHeader extends StatelessWidget {
                         child: Text(
                           'الكل مقروء',
                           style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.burgundy,
+                            color: const Color(0xFFD97706),
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -155,7 +155,7 @@ class ProviderHeader extends StatelessWidget {
                                         width: 6,
                                         height: 6,
                                         decoration: const BoxDecoration(
-                                          color: AppColors.burgundy,
+                                          color: AppColors.primary,
                                           shape: BoxShape.circle,
                                         ),
                                       ),
@@ -203,7 +203,7 @@ class ProviderHeader extends StatelessWidget {
                     child: Icon(
                       Icons.notifications_outlined,
                       size: 20,
-                      color: AppColors.burgundy,
+                      color: Color(0xFF2E2527),
                     ),
                   ),
                 ),
@@ -214,7 +214,7 @@ class ProviderHeader extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: const BoxDecoration(
-                        color: AppColors.burgundy,
+                        color: AppColors.primary,
                         shape: BoxShape.circle,
                       ),
                       constraints:
@@ -223,7 +223,7 @@ class ProviderHeader extends StatelessWidget {
                         child: Text(
                           '$unreadCount',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF2E2527),
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
                             height: 1,
@@ -248,12 +248,12 @@ class ProviderHeader extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: const BoxDecoration(
-                  color: AppColors.burgundy,
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
                   //border: Border.all(color: AppColors.gold, width: 1.5),
                 ),
                 child: const Center(
-                  child: Icon(Icons.person, color: Colors.white, size: 20),
+                  child: Icon(Icons.person, color: Color(0xFF2E2527), size: 20),
                 ),
               ),
             ),

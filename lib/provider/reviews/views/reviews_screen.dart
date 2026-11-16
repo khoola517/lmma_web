@@ -475,7 +475,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
             setState(() => _currentPage = 1);
           },
         ),
-        SizedBox(width: 10,),
+        const SizedBox(width: 10),
 
         // Service Dropdown Filter (inline next to "تم الرد عليها")
         if (provider.availableServicesWithReviews.length > 1)

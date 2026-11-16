@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:khadematy_web/core/theme/app_colors.dart';
 import 'package:khadematy_web/core/theme/app_text_styles.dart';
@@ -54,11 +55,11 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: const BoxDecoration(
-                color: AppColors.errorBg,
+                color: Color(0xFFFEF3C7),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.warning_amber_rounded,
-                  color: AppColors.error, size: 22),
+                  color: Color(0xFFD97706), size: 22),
             ),
             const SizedBox(width: 12),
             Text('تأكيد رفض طلب الحجز', style: AppTextStyles.headlineSmall),
@@ -97,7 +98,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
               ),
               CustomButton(
                 text: 'تأكيد الرفض',
-                variant: ButtonVariant.danger,
+                variant: ButtonVariant.primary,
                 onPressed: () async {
                   Navigator.pop(ctx);
                   final reason = reasonController.text.trim();
@@ -114,7 +115,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                               : 'تعذر رفض الطلب، يرجى المحاولة لاحقاً',
                         ),
                         backgroundColor:
-                            success ? AppColors.error : AppColors.burgundy,
+                            success ? AppColors.success : const Color(0xFF2E2527),
                       ),
                     );
                   }
@@ -167,7 +168,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                 value: '${requests.length}',
                 //subText: requests.isNotEmpty ? 'تحتاج إجراء' : 'تم الرد',
                 subTextColor: requests.isNotEmpty
-                    ? AppColors.burgundy
+                    ? const Color(0xFFD97706)
                     : AppColors.success,
                 icon: Icons.mark_email_unread_outlined,
                 iconBg: const Color(0xFFFEF3C7),
@@ -229,7 +230,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
               ProviderFilterChip(
                 label: 'انتهت المهلة ($expiredCount)',
                 isSelected: _selectedFilter == 'expired',
-                activeColor: AppColors.error,
+                activeColor: const Color(0xFFD97706),
                 onTap: () => setState(() => _selectedFilter =
                     _selectedFilter == 'expired' ? 'all' : 'expired'),
               ),
@@ -360,14 +361,14 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                               req.customerAvatar,
                               fit: BoxFit.cover,
                               errorBuilder: (c, e, s) => Container(
-                                color: AppColors.burgundyLight,
+                                color: const Color(0xFFFEF3C7),
                                 child: Center(
                                   child: Text(
-                                    req.customerName.isNotEmpty
-                                        ? req.customerName.substring(0, 1)
+                                    req.customerName.trim().isNotEmpty
+                                        ? req.customerName.trim().substring(0, 1)
                                         : 'ع',
                                     style: AppTextStyles.headlineSmall.copyWith(
-                                      color: AppColors.burgundy,
+                                      color: const Color(0xFFD97706),
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -375,14 +376,14 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                               ),
                             )
                           : Container(
-                              color: AppColors.burgundyLight,
+                              color: const Color(0xFFFEF3C7),
                               child: Center(
                                 child: Text(
-                                  req.customerName.isNotEmpty
-                                      ? req.customerName.substring(0, 1)
+                                  req.customerName.trim().isNotEmpty
+                                      ? req.customerName.trim().substring(0, 1)
                                       : 'ع',
                                   style: AppTextStyles.headlineSmall.copyWith(
-                                    color: AppColors.burgundy,
+                                    color: const Color(0xFFD97706),
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -460,7 +461,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                   if (req.isExpired)
                     StatusBadge(
                       label: 'انتهت المهلة (${req.defaultResponseHours} س)',
-                      type: StatusBadgeType.cancelled,
+                      type: StatusBadgeType.waiting,
                       icon: Icons.timer_off_outlined,
                     )
                   else if (req.isUrgent)
@@ -536,7 +537,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                       icon: Icons.payments,
                       label: "السعر",
                       value: '${req.budget.toStringAsFixed(0)} ر.ي',
-                      valueColor: AppColors.burgundy,
+                      valueColor: const Color(0xFF2E2527),
                     ),
                   ],
                 );
@@ -561,12 +562,12 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                 Row(
                   children: [
                     const Icon(Icons.check_circle_outline,
-                        size: 16, color: AppColors.burgundy),
+                        size: 16, color: Color(0xFFD97706)),
                     const SizedBox(width: 8),
                     Text(
                       'الخدمة المطلوبة: ${req.serviceName}',
                       style: AppTextStyles.labelMedium.copyWith(
-                        color: AppColors.burgundy,
+                        color: const Color(0xFF2E2527),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -594,20 +595,20 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: AppColors.errorBg,
+                color: const Color(0xFFFEF3C7),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.errorBorder),
+                border: Border.all(color: const Color(0xFFFDE68A)),
               ),
               child: Row(
                 children: [
                   const Icon(Icons.timer_off_outlined,
-                      color: AppColors.error, size: 20),
+                      color: Color(0xFFD97706), size: 20),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'تجاوز هذا الطلب مهلة الرد المحددة (${req.defaultResponseHours} ساعة). تم إخفاء زر القبول ويُرجى إلغاء الطلب لإشعار العميل على الموبايل.',
+                      'تجاوز هذا الطلب مهلة الرد المحددة (${req.defaultResponseHours} ساعة). ما زال بإمكانك قبول وتأكيد الحجز أو الاعتذار عنه للعميل.',
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.error,
+                        color: const Color(0xFFD97706),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -616,93 +617,56 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
               ),
             ),
             const SizedBox(height: 14),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                CustomButton(
-                  text: isProcessing
-                      ? 'جاري الإلغاء...'
-                      : 'إلغاء الحجز وإشعار العميل',
-                  icon: isProcessing ? null : Icons.cancel_outlined,
-                  variant: ButtonVariant.danger,
-                  height: 40,
-                  padding: const EdgeInsets.symmetric(horizontal: 22),
-                  onPressed: isProcessing
-                      ? null
-                      : () async {
-                          final success = await provider.cancelExpiredBooking(
-                            req.id,
-                            reason:
-                                'تجاوز مهلة تأكيد الحجز (${req.defaultResponseHours} ساعة)',
-                          );
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  success
-                                      ? 'تم إلغاء الحجز بنجاح وإرسال إشعار للعميل في الموبايل'
-                                      : 'تعذر إلغاء الحجز، يرجى المحاولة لاحقاً',
-                                ),
-                                backgroundColor: success
-                                    ? AppColors.burgundy
-                                    : AppColors.error,
-                              ),
-                            );
-                          }
-                        },
-                ),
-              ],
-            ),
-          ] else ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                CustomButton(
-                  text: isProcessing ? 'جاري المعالجة...' : 'قبول وتأكيد الحجز',
-                  icon: isProcessing ? null : Icons.check_circle_outline,
-                  variant: ButtonVariant.primary,
-                  height: 40,
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  onPressed: isProcessing
-                      ? null
-                      : () async {
-                          final success =
-                              await provider.acceptBookingRequest(req.id);
-                          if (context.mounted) {
-                            if (success) {
-                              context
-                                  .read<ProfileProvider>()
-                                  .incrementBookingsCount();
-                            }
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  success
-                                      ? 'تم قبول وتأكيد حجز ${req.customerName} بنجاح وإضافته إلى الحجوزات المؤكدة'
-                                      : (provider.errorMessage ??
-                                          'تعذر قبول الحجز، يرجى المحاولة لاحقاً'),
-                                ),
-                                backgroundColor: success
-                                    ? AppColors.burgundy
-                                    : AppColors.error,
-                              ),
-                            );
-                          }
-                        },
-                ),
-                const SizedBox(width: 12),
-                CustomButton(
-                  text: 'رفض الطلب',
-                  icon: Icons.close,
-                  variant: ButtonVariant.danger,
-                  height: 40,
-                  onPressed: isProcessing
-                      ? null
-                      : () => _confirmRejectRequest(context, req, provider),
-                ),
-              ],
-            ),
           ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              CustomButton(
+                text: isProcessing ? 'جاري المعالجة...' : 'قبول وتأكيد الحجز',
+                icon: isProcessing ? null : Icons.check_circle_outline,
+                variant: ButtonVariant.primary,
+                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                onPressed: isProcessing
+                    ? null
+                    : () async {
+                        final messenger = ScaffoldMessenger.of(context);
+                        final profileProvider =
+                            context.read<ProfileProvider>();
+                        final success =
+                            await provider.acceptBookingRequest(req.id);
+                        if (!mounted) return;
+                        if (success) {
+                          profileProvider.incrementBookingsCount();
+                        }
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              success
+                                  ? 'تم قبول وتأكيد حجز ${req.customerName} بنجاح وإضافته إلى الحجوزات المؤكدة'
+                                  : (provider.errorMessage ??
+                                      'تعذر قبول الحجز، يرجى المحاولة لاحقاً'),
+                              style: GoogleFonts.cairo(color: Colors.white),
+                            ),
+                            backgroundColor: success
+                                ? AppColors.success
+                                : const Color(0xFF2E2527),
+                          ),
+                        );
+                      },
+              ),
+              const SizedBox(width: 12),
+              CustomButton(
+                text: 'رفض الطلب',
+                icon: Icons.close,
+                variant: ButtonVariant.outline,
+                height: 40,
+                onPressed: isProcessing
+                    ? null
+                    : () => _confirmRejectRequest(context, req, provider),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -729,7 +693,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
         children: [
           Row(
             children: [
-              Icon(icon, size: 16, color: AppColors.burgundy),
+              Icon(icon, size: 16, color: const Color(0xFFD97706)),
               const SizedBox(width: 6),
               Text(
                 label,

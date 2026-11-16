@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:khadematy_web/core/theme/app_colors.dart';
 import 'package:khadematy_web/core/theme/app_text_styles.dart';
@@ -119,8 +120,8 @@ class DashboardScreen extends StatelessWidget {
           value: '$totalBookings',
           subText: '',
           icon: Icons.event_seat_outlined,
-          iconBg: AppColors.burgundyLight,
-          iconColor: AppColors.burgundy,
+          iconBg: const Color(0xFFFEF3C7),
+          iconColor: const Color(0xFFD97706),
           onTap: () => context
               .read<NavigationProvider>()
               .selectItem(ProviderNavItem.confirmedBookings),
@@ -130,7 +131,7 @@ class DashboardScreen extends StatelessWidget {
           value: '$pendingCount',
           // subText: pendingCount > 0 ? 'تحتاج إجراء' : 'تم الرد عليها',
           subTextColor:
-              pendingCount > 0 ? AppColors.burgundy : AppColors.success,
+              pendingCount > 0 ? const Color(0xFFD97706) : AppColors.success,
           icon: Icons.mark_email_unread_outlined,
           iconBg: AppColors.goldLight,
           iconColor: AppColors.goldDark,
@@ -183,11 +184,11 @@ class DashboardScreen extends StatelessWidget {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: AppColors.burgundyLight,
+                        color: const Color(0xFFFEF3C7),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(Icons.flash_on,
-                          color: AppColors.burgundy, size: 18),
+                          color: Color(0xFFD97706), size: 18),
                     ),
                     const SizedBox(width: 10),
                     Flexible(
@@ -205,13 +206,15 @@ class DashboardScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppColors.burgundy,
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         '${requests.length} جديد',
-                        style: AppTextStyles.labelSmall
-                            .copyWith(color: Colors.white),
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: const Color(0xFF2E2527),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -223,7 +226,7 @@ class DashboardScreen extends StatelessWidget {
                 child: Text(
                   'عرض كافة الطلبات ←',
                   style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.burgundy,
+                    color: const Color(0xFF2E2527),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -264,15 +267,17 @@ class DashboardScreen extends StatelessWidget {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: AppColors.burgundyLight,
+                          color: const Color(0xFFFEF3C7),
                           shape: BoxShape.circle,
                           border: Border.all(color: AppColors.borderDark),
                         ),
                         child: Center(
                           child: Text(
-                            req.customerName.substring(0, 1),
+                            req.customerName.trim().isNotEmpty
+                                ? req.customerName.trim().substring(0, 1)
+                                : 'ع',
                             style: AppTextStyles.headlineSmall.copyWith(
-                              color: AppColors.burgundy,
+                              color: const Color(0xFFD97706),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -296,7 +301,7 @@ class DashboardScreen extends StatelessWidget {
                                 if (req.isExpired)
                                   const StatusBadge(
                                     label: 'انتهت المهلة',
-                                    type: StatusBadgeType.cancelled,
+                                    type: StatusBadgeType.waiting,
                                     icon: Icons.timer_off_outlined,
                                   )
                                 else if (req.isUrgent)
@@ -330,64 +335,47 @@ class DashboardScreen extends StatelessWidget {
                           Text(
                             '${req.budget.toStringAsFixed(0)} ر.ي',
                             style: AppTextStyles.titleMedium.copyWith(
-                              color: AppColors.burgundy,
-                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF2E2527),
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 6),
                           Row(
                             children: [
-                              if (!req.isExpired)
-                                CustomButton(
-                                  text: 'قبول',
-                                  height: 32,
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 12),
-                                  variant: ButtonVariant.primary,
-                                  onPressed: () async {
-                                    final success = await bookingsProvider
-                                        .acceptBookingRequest(req.id);
-                                    if (context.mounted) {
-                                      if (success) {
-                                        context
-                                            .read<ProfileProvider>()
-                                            .incrementBookingsCount();
-                                      }
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            success
-                                                ? 'تم قبول حجز ${req.customerName} وتأكيده بنجاح'
-                                                : (bookingsProvider.errorMessage ??
-                                                    'تعذر قبول الحجز، يرجى المحاولة لاحقاً'),
-                                          ),
-                                          backgroundColor: success
-                                              ? AppColors.burgundy
-                                              : AppColors.error,
-                                        ),
-                                      );
-                                    }
-                                  },
-                                )
-                              else
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.errorBg,
-                                    borderRadius: BorderRadius.circular(6),
-                                    border:
-                                        Border.all(color: AppColors.errorBorder),
-                                  ),
-                                  child: Text(
-                                    'تجاوز المهلة',
-                                    style: AppTextStyles.labelSmall.copyWith(
-                                      color: AppColors.error,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 10,
+                              CustomButton(
+                                text: 'قبول',
+                                height: 32,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                variant: ButtonVariant.primary,
+                                onPressed: () async {
+                                  final messenger =
+                                      ScaffoldMessenger.of(context);
+                                  final profileProvider =
+                                      context.read<ProfileProvider>();
+                                  final success = await bookingsProvider
+                                      .acceptBookingRequest(req.id);
+                                  if (!context.mounted) return;
+                                  if (success) {
+                                    profileProvider.incrementBookingsCount();
+                                  }
+                                  messenger.showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        success
+                                            ? 'تم قبول حجز ${req.customerName} وتأكيده بنجاح'
+                                            : (bookingsProvider.errorMessage ??
+                                                'تعذر قبول الحجز، يرجى المحاولة لاحقاً'),
+                                        style: GoogleFonts.cairo(
+                                            color: Colors.white),
+                                      ),
+                                      backgroundColor: success
+                                          ? AppColors.success
+                                          : const Color(0xFF2E2527),
                                     ),
-                                  ),
-                                ),
+                                  );
+                                },
+                              ),
                             ],
                           ),
                         ],
@@ -449,7 +437,7 @@ class DashboardScreen extends StatelessWidget {
                 child: Text(
                   'عرض جدول الحجوزات ←',
                   style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.burgundy,
+                    color: const Color(0xFF2E2527),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -496,16 +484,14 @@ class DashboardScreen extends StatelessWidget {
                         child: Column(
                           children: [
                             Text(
-                              b.eventDateString.split(' ').first,
+                              _formatBookingDay(b.eventDateString),
                               style: AppTextStyles.headlineSmall.copyWith(
-                                color: AppColors.burgundy,
+                                color: const Color(0xFF2E2527),
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
                             Text(
-                              b.eventDateString.split(' ').length > 1
-                                  ? b.eventDateString.split(' ')[1]
-                                  : '',
+                              _formatBookingMonth(b.eventDateString),
                               style: AppTextStyles.labelSmall
                                   .copyWith(color: AppColors.textMuted),
                             ),
@@ -551,7 +537,7 @@ class DashboardScreen extends StatelessWidget {
                       Text(
                         '${b.totalAmount.toStringAsFixed(0)} ر.ي',
                         style: AppTextStyles.titleMedium.copyWith(
-                          color: AppColors.burgundy,
+                          color: const Color(0xFF2E2527),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -600,7 +586,7 @@ class DashboardScreen extends StatelessWidget {
                 child: Text(
                   'إدارة الخدمات',
                   style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.burgundy,
+                    color: const Color(0xFF2E2527),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -627,7 +613,7 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     child: const Center(
                       child: Icon(Icons.celebration,
-                          color: AppColors.burgundy, size: 22),
+                          color: Color(0xFFD97706), size: 22),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -654,7 +640,7 @@ class DashboardScreen extends StatelessWidget {
                   Text(
                     '${s.price.toStringAsFixed(0)} ر.ي',
                     style: AppTextStyles.labelMedium.copyWith(
-                      color: AppColors.burgundy,
+                      color: const Color(0xFF2E2527),
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -665,5 +651,43 @@ class DashboardScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatBookingDay(String dateStr) {
+    final trimmed = dateStr.trim();
+    if (trimmed.isEmpty) return '--';
+    final parts = trimmed.split(' ');
+    if (parts.length > 1) return parts.first;
+    final dt = DateTime.tryParse(trimmed);
+    if (dt != null) return dt.day.toString();
+    return parts.first;
+  }
+
+  String _formatBookingMonth(String dateStr) {
+    final trimmed = dateStr.trim();
+    if (trimmed.isEmpty) return '';
+    final parts = trimmed.split(' ');
+    if (parts.length > 1) return parts[1];
+    final dt = DateTime.tryParse(trimmed);
+    if (dt != null) {
+      const months = [
+        'يناير',
+        'فبراير',
+        'مارس',
+        'أبريل',
+        'مايو',
+        'يونيو',
+        'يوليو',
+        'أغسطس',
+        'سبتمبر',
+        'أكتوبر',
+        'نوفمبر',
+        'ديسمبر'
+      ];
+      if (dt.month >= 1 && dt.month <= 12) {
+        return months[dt.month - 1];
+      }
+    }
+    return '';
   }
 }

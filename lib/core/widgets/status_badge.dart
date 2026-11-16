@@ -33,9 +33,9 @@ class StatusBadge extends StatelessWidget {
 
     switch (type) {
       case StatusBadgeType.waiting:
-        bgColor = AppColors.burgundyLight;
-        textColor = AppColors.burgundy;
-        borderColor = AppColors.burgundyLightBorder;
+        bgColor = const Color(0xFFFEF3C7);
+        textColor = const Color(0xFFD97706);
+        borderColor = const Color(0xFFFDE68A);
         break;
       case StatusBadgeType.confirmed:
       case StatusBadgeType.active:
